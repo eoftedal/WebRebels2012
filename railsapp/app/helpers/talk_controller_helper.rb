@@ -1,0 +1,2 @@
+module TalkControllerHelper
+end

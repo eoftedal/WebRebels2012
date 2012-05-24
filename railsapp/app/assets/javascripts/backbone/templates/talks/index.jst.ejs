@@ -1,0 +1,25 @@
+<h2>Talks</h2>
+<% var approved = talks.where({"approved": true }); %>
+<h3>Approved</h3>
+<ul class="talklist">
+<% if(approved.length > 0) { %>
+    <% $(approved).each(function(i, talk) { %>
+        <li><a href='#/talks/<%= talk.longId() %>'><%= talk.escape('title') %></a> <span>suggested by <%= talk.get("author").username %></span></li>
+    <% }); %>
+<% } else { %>
+    <em>No talks approved yet</em>
+<% } %>
+</ul>
+
+<h3>Suggested</h3>
+<% var suggested = talks.where({"approved": false }); %>
+<ul class="talklist">
+<% if(suggested.length > 0) { %>
+    <% $(suggested).each(function(i, talk) { %>
+        <li><a href='#/talks/<%= talk.longId() %>'><%= talk.escape('title') %></a> <span>suggested by <%= talk.get("author").username %></span></li>
+    <% }); %>
+<% } else { %>
+    <em>No suggested talks!</em>
+<% } %>
+</ul>
+

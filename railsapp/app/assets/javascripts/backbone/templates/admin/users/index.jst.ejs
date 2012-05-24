@@ -1,0 +1,6 @@
+<h2>Users</h2>
+<ul class="userlist">
+    <% users.each(function(user) {  %>
+        <li><a href="#/admin/users/<%= user.id %>"><%= user.fullname() %></a></li>
+    <% }); %>
+</ul>

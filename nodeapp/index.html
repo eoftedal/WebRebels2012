@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+<script>
+$(function() {
+	$("button").click(function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		$.post("/", "{symbol: '" + $("#data").val() + "'}")
+		.success(function(data) {
+			$("#result").text(data.symbol + ": " + data.price);
+		});
+	});
+});
+
+</script>
+</head>
+<body>
+Get a stock quote:
+<input type="text" id="data">
+<button>Check</button>
+<br>
+<br>
+<strong>Response:</strong>
+<div id="result">
+</div>
+
+</body>
+</html>

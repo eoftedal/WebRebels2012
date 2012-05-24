@@ -1,0 +1,22 @@
+<% if (App.Data.authentication.get("authenticated") && App.Data.authentication.id == talk.get("user_id")) { %>
+	<h2>Edit talk</h2>
+	<form id="edit-talk" name="talk" class="talk">
+	  <div class="field">
+	    <label for="title">Title</label>
+	    <input type="text" name="title" id="title" value="<%= talk.get("title") %>">
+	    <label for="title">Abstract</label>
+	    <textarea type="text" name="description" id="description"><%= talk.get("description") %></textarea>
+	  </div>
+
+	  <div class="actions">
+	    <input type="submit" value="Save changes" class="btn-primary" />
+	  </div>
+
+	</form>
+<% } else if (App.Data.authentication.get("authenticated")) { %>
+	<h2>Not authorized</h2>
+	This talk was not submitted by you.
+<% } else { %>
+	<h2>Please login first</h2>
+	To edit this talk, please sign in first.
+<% } %>

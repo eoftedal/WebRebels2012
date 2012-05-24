@@ -1,0 +1,9 @@
+<h2><%= user.fullname() %></h2>
+
+<p>
+<label>First name</label><%= user.get("first_name") %> &nbsp;
+<label>Last name</label><%= user.get("last_name") %> &nbsp;
+<label>Email</label><%= user.get("email") %> &nbsp;
+<label>Role</label><%= user.get("role") || "<em>none</em>" %> &nbsp;
+</p>
+<button class="editButton">Edit</button>

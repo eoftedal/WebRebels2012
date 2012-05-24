@@ -1,0 +1,275 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the top of the
+ * compiled file, but it's generally better to create a new file per style scope.
+ *
+ *= require_self
+ *= require_tree .
+*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+
+body {
+        background: rgb(252,252,253);
+        padding-bottom: 50px;
+		margin:0;
+		padding:0;
+}
+body, input, textarea, button {
+	-webkit-font-smoothing: antialiased;
+	font-family: 'Open Sans', verdana, Arial, sans-serif;
+}
+
+a {
+        text-decoration: none;
+}
+a:hover {
+        text-decoration: underline;
+}
+
+header {
+        color: #ddd;
+        border: 1px solid #ddd;
+        background: rgb(16,143,16);
+        background: -webkit-gradient(linear, left bottom, left top, color-stop(0, rgb(16,143,16)), color-stop(0.75, rgb(36,171,36))) ;
+        background: -moz-linear-gradient(center bottom, rgb(16,143,16) 0%, rgb(36,171,36) 75%);
+}
+
+div#main, header > div {
+        margin: 0 auto;
+        width: 800px;
+        padding: 10px 30px 10px 30px;
+        box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
+div#main {
+	min-height: 400px;
+	padding-top: 30px;
+	padding-bottom: 40px;
+}
+
+
+
+h1, h2 {
+	font-weight: bold;
+	font-size: 150%;
+	margin: 0.5em 0px 0.5em 0px;
+}
+h1 {
+	font-size: 200%;
+}
+
+h3 {
+	font-weight: bold;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+header {
+	height: 100px;
+	clear: both;
+}
+header * {
+	color: #fff;
+}
+
+.userinfo {
+	float: right;
+	font-size: 90%;
+}
+
+.userinfo a {
+	margin-left: 5px;
+}
+.userinfo img{
+        vertical-align: middle;
+        margin-left: 16px;
+}
+
+
+#grayLayer {
+	background: rgba(0, 0, 0, 0.5);
+	top: 0px;
+	left: 0px;
+	position: absolute;
+	z-index: 10;
+}
+#modal {
+	z-index: 20;
+	position: absolute;
+	background: #fff;
+	padding: 20px;
+	box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+#loginBox {
+	width: 250px;
+	border: 1px solid #eee;
+	padding: 20px;
+}
+
+
+#login-form {
+	margin: 0px 0px 10px 0px;
+}
+
+form label, form input, form button {
+	display: block;
+}
+form label:after {
+	content: ":";
+}
+form input, form button {
+	margin-bottom: 5px;
+	margin-top: 2px;
+}
+button#googleLogin div {
+	padding: 6px 5px 0px 31px;
+	background: url('/images/fb-goog.gif') -221px center no-repeat;
+	height: 24px;
+	margin: -5px;
+}
+button#googleLogin {
+	display: block;
+	margin: 4px 0px 0px 0px;
+}
+
+header ul, header ul li {
+	display: inline;
+}
+header ul li {
+	margin-right: 20px;
+}
+
+label {
+	display: block;
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+p {
+	margin-bottom: 10px;
+}
+
+.talk textarea, .talk input[type=text] {
+	width: 80%;
+
+}
+ul.talklist {
+	margin-bottom: 10px;
+}
+ul.talklist li span {
+	color: #444;
+	font-size: 90%;
+}
+ul.talklist li span:before {
+	content: "- ";
+}
+ul.talklist li {
+	margin-bottom: 0.2em;
+}
+
+ul.userlist li:before{
+	content: "- ";
+}
+ul.userlist li {
+	margin-bottom: 5px;
+}
+
+em {
+	font-style: italic;
+}
+
+textarea {
+	height: 5em;
+}
+.talk input[type=text], .talk textarea {
+	margin: 0px 0px 5px 0px;
+	padding: 0px;
+}
+
+input[type=text], input[type=password], textarea {
+	border: 1px solid #aaa;
+	border-radius: 3px;
+	font-size: 100%;
+}
+input[type=text]:focus, input[type=password]:focus, textarea:focus {
+	box-shadow: 0px 0px 2px rgba(16,143,16, 0.5);
+	border-color: rgb(16,143,16);
+}
+.actions input, .actions button {
+	display: inline;
+}
+
+.btn-primary {
+    background-color: #0074CC;
+    background-image: -moz-linear-gradient(center top , #0088CC, #0055CC);
+    background-repeat: repeat-x;
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+    border-radius: 3px;
+    color: #ffffff;
+}
+.btn-primary:hover {
+    background-color: #0064BC;
+    background-image: -moz-linear-gradient(center top , #0078bC, #0045BC);
+}
+
+.welcome {
+	font-size: 130%;
+}
+.welcome p {
+	margin-bottom: 1em;
+}
+
+span.date {
+	font-size: 70%;
+	margin-bottom: 1em;
+	display: block;
+	color: #888;
+}
+

@@ -1,0 +1,25 @@
+<h2><%= talk.get("title") %></h2>
+<span class="date">Submitted <%= new Date(Date.parse(talk.get("created_at"))).toLocaleString() %></span>
+
+<p>
+<label>Speaker</label>
+<%= talk.get("author").username %>
+</p>
+
+
+
+<p>
+<label>Abstract</label>
+<%= talk.get("description") %>
+</p>
+<% if (App.Data.authentication.get("authenticated") && App.Data.authentication.id == talk.get("user_id")) { %>
+	<p>
+		<button class="editButton">Edit</button>
+	</p>
+<% } %>
+<% if (App.Data.authentication.get("authenticated") && App.Data.authentication.get("role") == "admin") { %>
+	<p>
+		<button class="approveButton"><%= talk.get("approved") === false ? "Approve" : "Disapprove" %></button>
+	</p>
+<% } %>
+
