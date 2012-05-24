@@ -1,9 +1,9 @@
 * **Presentation** is the slides
-* **node** is a small insecure node.js app
-* **singlepage** is a insecure single page webapp built with poorly written rails and backbone.js
+* **nodeapp** is a small insecure node.js app
+* **railsapp** is a insecure single page webapp built with poorly written rails and backbone.js
 
 
-node and singlepage are two really **insecure** webapps. **Do NOT use the 
+nodeapp and railsapp are two really **insecure** webapps. **Do NOT use the 
 code** for anything except show how poorly code can be written and how 
 insecure an app can be.
 
