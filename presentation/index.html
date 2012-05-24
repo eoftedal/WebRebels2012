@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<!--
+  Google HTML5 slide template
+
+  Authors: Luke Mah? (code)
+           Marcin Wichary (code and design)
+
+           Dominic Mazzoni (browser compatibility)
+           Charles Chen (ChromeVox support)
+
+  URL: http://code.google.com/p/html5slides/
+-->
+<html>
+  <head>
+    <title>Securing a JavaScript based Web Applicaiton</title>
+
+    <meta charset='utf-8'>
+    <script src='slides.js'></script>
+	<script src='jquery-1.7.1.min.js'></script>
+	<link rel="stylesheet" href="custom.css" type="text/css" />	
+	<script>
+	$(function() {
+		$(".urlize").each(function(i, e) {
+			var link = $(e).text();
+			$(e).html("").append($("<a>").text(link).attr("href", link));
+		});
+	});
+	$(function() {
+		$(".dual").click(function(){
+			window.slaveWindow = window.open(document.location, "_blank");
+			window.slaveWindow.slave = true;
+			setTimeout(function() { $(window.slaveWindow.document.body).addClass("presenterView") }, 1000);
+			$(window).bind("keydown", function(e) {
+				window.slaveWindow.handleBodyKeyDown(e);
+			});
+			$(window).bind("hashchange", function() {
+				window.slaveWindow.location = location;
+			});
+		});
+	});
+	$(window).bind("hashchange", function(e) {
+		if (window.slave) {
+
+			getCurSlideFromHash();
+			updateSlides();
+		}
+	});
+	</script>
+  </head>
+
+<body style='display: none'>
+
+<section class='slides layout-regular template-bekk'>
+<article class="contrast">
+	<h1>Securing a JavaScript based Web Applicaiton</h1>
+	<p>
+	  Erlend Oftedal
+	  &mdash;
+	  <a href="http://twitter.com/webtonull">@webtonull</a>
+	  <br>
+	  Web Rebels
+	</p>
+    <img src="images/bekk-logo.png" class="bottom-right dual" style="margin: 10px" />
+</article>	  
+
+<article>
+	<h3>Who am I?</h3>
+	<img src="images/erlend.jpg" style="position: absolute; bottom: 2.5em; right: 1em; " />
+	<ul>
+		<li>Work as a developer</li>
+		<li>Leader of the Security Competency group at <a href="http://www.bekk.no">BEKK</a></li>
+		<li><a href="https://www.owasp.org/index.php/Norway">OWASP Norway Chapter</a> lead</li>
+		<li>Member of <a href="http://www.honeynor.no/">Norwegian Honeynet Project</a></li>
+	</ul>
+	<img src="images/bekk-logo.png" class="bottom-right" style="margin: 10px" />
+</article>
+
+
+<article style="background-image: url('images/app.png')" class="center-picture">
+</article>
+
+<article>
+	<h3>But first...</h3>
+	_=[]|[];$=_++;__=(_&lt;&lt;_);___=(_&lt;&lt;_)+_;____=__+__;_____=__+___;$$=({}+"")[_____]+({}+"")[_]+({}[$]+"")[_]+(($!=$)+"")[___]+(($==$)+"")[$]+(($==$)+"")[_]+(($==$)+"")[__]+({}+"")[_____]+(($==$)+"")[$]+({}+"")[_]+(($==$)+"")[_];$$$=(($!=$)+"")[_]+(($!=$)+"")[__]+(($==$)+"")[___]+(($==$)+"")[_]+(($==$)+"")[$];$_$=({}+"")[_____]+({}+"")[_]+({}+"")[_]+(($!=$)+"")[__]+({}+"")[__+_____]+({}+"")[_____]+({}+"")[_]+({}[$]+"")[__]+(($==$)+"")[___]; ($)[$$][$$]($$$+"('"+$_$+"')")()
+	<cite>Yosuke Hasegawa - 472 bytes</cide>
+</article>
+
+<article>
+	<h3>OWASP Top 10</h3>
+	<dl>
+		<dt>A1</dt><dd>Injection</dd>
+		<dt>A2</dt><dd>Cross Site Scripting (XSS)</dd>
+		<dt>A3</dt><dd>Broken Authentication and Session Management</dd>
+		<dt>A4</dt><dd>Insecure Direct Object Reference</dd>
+		<dt>A5</dt><dd>Cross Site Request Forgery (CSRF)</dd>
+		<dt>A6</dt><dd>Security Misconfiguration</dd>
+		<dt>A7</dt><dd>Insecure Cryptographic Storage</dd>
+		<dt>A8</dt><dd>Failure to Restrict URL Access</dd>
+		<dt>A9</dt><dd>Insufficient Transport Layer Protection</dd>
+		<dt>A10</dt><dd>Unvalidated Redirects and Forwards</dd>
+	</dl>
+	<img src="images/owasp.jpg" class="bottom-right" style="margin: 10px" />
+</article>
+
+<article style="background-image: url('images/these_are_not_the_droids.jpg')" class="center-picture contrast">
+	<h3>A10 - Unvalidated Redirects and Forwards</h3>
+</article>
+
+<article>
+	<h3>A10 - Unvalidated Redirects and Forwards</h3>
+	<div>
+		<pre class="lang-xml">http://example.com/redirect?url=http://evil.com</pre>
+		<pre class="lang-xml">http://example.com/login?url=http://evil.com</pre>
+	</div>
+</article>
+
+<article>
+	<h3>Twitter september 2010</h3>
+	<div class="build">
+		<pre>(function(q) {
+  var a = location.href.split("#!")[1];
+  if (a) {
+    g.location = a;
+  }
+})</pre>
+		<div style="text-align: center"><code>https://twitter.com/#!/web_rebels</code><br>&darr;<br><code>https://twitter.com/web_rebels</code><br><br></div>
+		<div style="text-align: center;" class="warn"><code>https://twitter.com/#!http://evil.com</code><br>&darr;<br><code>http://evil.com</code></div>
+	</div>
+	<cite class="urlize">http://blog.mindedsecurity.com/2010/09/twitter-domxss-wrong-fix-and-something.html</cite>
+</article>
+
+<article>
+	<h3>Fixing Unvalidated Redirects and Forwards</h3>
+	<ul class="build">
+		<li>Sanitize or white-list your redirect locations</li>
+		<li>Do it properly</li>
+	</ul>
+</article>
+
+<article style="background-image: url('images/transport-fail.jpg')" class="center-picture contrast">
+	<h3>A9 - Insufficient Transport Layer Protection</h3>
+	<cite class="urlize">http://www.flickr.com/photos/edgoodwin/</cite>
+</article>
+
+<article>
+	<h3>A9 - Insufficient Transport Layer Protection</h3>
+	<ul class="build">
+		<li>If your application has private data - always use <code>https:</code></li>
+		<li>Lock down your SSL/TLS config - <a href="https://www.ssllabs.com/ssltest/index.html">SSL Server Test</a></li>
+	</ul>
+	<ul class="build">
+		<li>If your login page is delivered over http...</li>
+		<div>... it may not matter if the forms submits to https</div>
+		<li><a href="http://www.thoughtcrime.org/software/sslstrip/">sslstrip</a></li>
+	</ul>
+</article>
+
+<article style="background-image: url('images/airport.jpg')" class="center-picture contrast">
+	<h3>A8 - Failure to restrict URL access / <br> 
+		A4 - Insecure Direct Object Reference</h3>
+
+		<cite class="urlize">http://www.flickr.com/photos/56369179@N00/</cite>
+</article>
+
+
+<article>
+	<h3>A8 - Failure to restrict URL access / <br> 
+		A4 - Insecure Direct Object Reference</h3>
+	<ul class="build">
+		<li>Vertical access control - roles</li>
+		<li>Horisontal access control - data access</li>
+	</ul>
+	<ul class="build warn">
+		<li>Client side access control is no substitute for server side access control</li>
+	</ul>
+	<aside>Demo</aside>
+</article>
+
+
+<article style="background-image: url('images/crypto.png')" class="center-picture contrast">
+	<h3>A7 - Insecure Cryptographic Storage</h3>
+
+		<cite class="urlize">http://xkcd.com/538/</cite>
+</article>
+
+
+<article>
+	<h3>A7 - Insecure Cryptographic Storage</h3>
+	<ul class="build">
+		<li>Browser storage<ul>
+			<li>Deleted on logout?</li>
+			<li>Deleted when closing browser?</li>
+		</ul></li>
+		<li>localStorage - stored untill deleted</li>
+		<li>sessionStorage - deleted on browser exit/restart</li>
+		<li>Cache/Offlinerising (Hello @jaffathecake)</li>
+	</ul>
+	<ul class="build">
+		<li>Does it matter?</li>
+	</ul>
+</article>
+
+<article style="background-image: url(images/iphone.png)" class="center-picture">
+</article>
+<article style="background-image: url(images/ipad.png)" class="center-picture">
+</article>
+
+<article>
+	<h3>Server side crypto</h3>
+	<ul class="build">
+		<li>TM; NT</li>
+		<li>See the <a href="https://www.owasp.org/index.php/Cryptographic_Storage_Cheat_Sheet">OWASP Cryptographic
+ Storage Cheat Sheet</a></li>
+	</ul>
+</article>
+
+
+<article class="contrast">
+	<h3>A6 - Security Misconfiguration</h3>
+	<div style="height: 312px; overflow:hidden; margin: 0 auto; text-align: center; margin-top: 100px">
+		<img src="images/camerafail.jpg">
+	</div>
+	<cite class="urlize">http://failblog.org/2008/01/03/fail-camera/</cite>
+</article>
+
+<article>
+	<h3>A6 - Security Misconfiguration</h3>
+	<ul class="build">
+		<li>CORS:<pre class="inbetween">Access-Control-Allow-From: *
+Access-Control-Allow-Credentials: true</pre>
+		</li>
+		<li>Crossdomain.xml
+<pre class="inbetween">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;cross-domain-policy&gt;
+  &lt;allow-access-from domain="*" /&gt;
+&lt;/cross-domain-policy&gt;</pre>
+		</li>
+	</ul>
+</article>
+
+<article>
+	<h3>Open crossdomain.xmls</h3>
+	<p>Alexa top 100 local domains:</p>
+	<table class="graph">
+	<tr>
+		<td><img src="images/sweden.jpg"></td>
+		<td>
+			<div class="green" style="width: 180px"></div>
+			<div class="red" style="width: 80px"></div>
+			26
+		</td>
+	</tr>
+	<tr>
+		<td><img src="images/norway.jpg"></td>
+		<td>
+			<div class="green" style="width: 100px"></div>
+			<div class="red" style="width: 200px"></div>
+			30
+		</td>
+	</tr>
+	<tr>
+		<td><img src="images/denmark.jpg"></td>
+		<td>
+			<div class="green" style="width: 160px"></div>
+			<div class="red" style="width: 130px"></div>
+			29
+		</td>
+	</tr>
+	</table>
+	<cite>Tested 18. mai 2012</cite>
+</article>
+
+<article>
+	<h3>What about Access-control-Allow-* ?</h3>
+
+	<ul class="build">
+		<li><code>Access-Control-Allow-From: *</code>
+			<ul><li>Allow browser to read response regardles of origin</li></ul>
+		</li>
+		<li><code>Access-Control-Allow-Credentials: true</code>
+			<ul><li>Allow browser to include credentials in request</li></ul>
+		</li>
+		<li>Let's <a href="http://www.shodanhq.com/search?q=%22access-control-allow-credentials%3A+true%22+AND+%22access-control-allow-origin%3A+%22">Shodan it</a></li>
+	</ul>
+</article>
+
+<article>
+	<h3>And now...</h3>
+	$=[$=[]][(!$+'')[-~-~-~$]+({}+$)[+!'']+($$=(!''+$)[+!''])+(_=(!+$+$)[+$])],$()[(!$+$)[+!'']+(!$+'')[-~-~$]+(!''+'')[-~-~-~$]+$$+_](+!'') 
+	<cite>Gareth Heyes - 136 bytes</cite>
+</article>
+
+<article class="contrast center-picture" style="background-image: url('images/forgery.jpg')">
+	<h3>A5 - Cross Domain Request Forgery</h3>
+	<cite class="nosource">Image source: <span class="urlize">http://www.philatelicdatabase.com/forgeries/stamp-forgeries-1951/</span></cite>
+</article>
+
+
+<article>
+	<h3>A5 - Cross Domain Request Forgery</h3>
+	<p>Does your server know if the request originated from a page or javascript delivered by itself?</p>
+</article>
+
+<article>
+	<h3>CSRF - Is it really a problem?</h3>
+	<ul class="build">
+		<li><a href="http://twitter.com/homakov">@homakov</a> posted a <a href="http://homakov.blogspot.com/2012/03/hacking-skrillformer-moneybookers.html">blog post with CSRF vulnerabilities</a> in:<ul>
+			<li>github</li>
+			<li>slideshare</li>
+			<li>vimeo</li>
+			<li>bitbucket</li>
+			<li>heroku</li>
+		</ul></li>
+		<li>Heroku bug:
+			 <pre>&lt;img src=xxx/update?site_name[name]=yyy&gt;</pre>
+		</li>
+		<li>... rename site from xxx.heroku.com to yyy.heroku.com</li>
+	</ul>
+</article>
+
+<article>
+	<h3>CSRF + Cross Domain XHR</h3>
+	<pre>function fileUpload(url, fileData, fileName) {
+ var fileSize = fileData.length;
+ var boundary = "xxxxxxxxx";
+ var xhr = new XMLHttpRequest();
+ xhr.open("POST", url, true);
+ xhr.setRequestHeader("Content-Type", 
+   "multipart/form-data, boundary="+boundary);
+ xhr.setRequestHeader("Content-Length", fileSize);
+ var body = "--" + boundary + "\r\n";
+ body += 'Content-Disposition: form-data; name="contents"; filename="'
+   + fileName + '"\r\n';
+ body += "Content-Type: application/octet-stream\r\n\r\n";
+ body += fileData + "\r\n";
+ body += "--" + boundary + "--";
+ xhr.send(body);
+ return true;
+}</pre>
+	<cite class="urlize">http://blog.kotowicz.net/2011/04/how-to-upload-arbitrary-file-contents.html</cite>
+</article>
+
+
+
+<article>
+	<h3>Use anti forgery tokens</h3>
+	<pre>$("body").bind("ajaxSend", function(elm, xhr, s){
+  if (s.type === "POST") {
+    xhr.setRequestHeader('X-CSRF-Token', authentication.csrf_token);
+  }
+});</pre>
+</article>
+
+<article class="contrast center-picture" style="background-image: url('images/anoras.jpg')">
+	<h3>A3 - Broken Authentication and Session Management</h3>
+	<cite class="nosource">Image source: <a href="http://twitter.com/anoras">@anoras</a></cite>
+</article>
+
+<article>
+	<h3>A3 - Broken Authentication and Session Management</h3>
+	<ul class="build">
+		<li>How is my session terminated on log out?<ul>
+			<li>Client-side only?</li>
+			<li>Server-side?</li>
+		</ul></li>
+		<li>What is left behind in Web Storage?</li>
+		<li>How does the client know who is logged in?</li>
+	</ul>
+	<ul class="build">
+		<li>Let's not lose track of the current session policies</li>
+		<li>Sessions should time out</li>
+		<li>Return a 401 and handle it from JS on the client</li>
+	</ul>
+</article>
+
+
+<article class="contrast center-picture" style="background-image: url('images/fig_xss_explained.png')">
+	<h3>A2 - Cross Site Scripting (XSS)</h3>
+	<cite class="nosource">Image source: <a href="http://twitter.com/johnwilander">@johnwilander</a></cite>
+</article>
+
+<article>
+	<h3>Reflected Cross Site Scripting </h3>
+	<div>
+		<img src="images/fig_xss_reflected.png" style="z-index: 10; top: 200px; position: absolute;" />
+	</div>
+	<cite class="nosource">Image source: <a href="http://twitter.com/johnwilander">@johnwilander</a></cite>
+</article>
+
+<article>
+	<h3>Stored Cross Site Scripting </h3>
+	<div class="build">
+		<img src="images/fig_xss_stored_1.png" style="z-index: 10; top: 175px; position: absolute;" />
+		<img src="images/fig_xss_stored_2.png" style="z-index: 11; top: 200px; position: absolute;" />
+	</div>
+	<cite class="nosource">Image source: <a href="http://twitter.com/johnwilander">@johnwilander</a></cite>
+</article>
+
+<article>
+	<h3>DOM-based Cross Site Scripting</h3>
+	<div>
+		<img src="images/fig_xss_dom.png" style="z-index: 10; top: 150px; position: absolute;" />
+	</div>
+	<cite class="nosource">Image source: <a href="http://twitter.com/johnwilander">@johnwilander</a></cite>
+</article>
+
+
+
+<article>
+	<h3>DOM-based - XSS</h3>
+	<ul class="build">
+		<li>Occurs in javascript</li>
+		<li>Not necessarily visible at the server</li>
+		<pre class="lang-xml">http://ex.fm/#!/explore/&lt;script>alert("@vlycser");&lt;/script></pre>
+	</ul>
+	<ul class="build">
+		<li>Insecure handling of input in javascript</li>
+	</ul>
+	<aside>Demo</aside>
+</article>
+
+<article>
+	<h3>Unsafe javascript functions</h3>
+	<ul class="build">
+		<li><code>eval(string)</code></li>
+		<li><code>setTimeout(string, delay)</code></li>
+		<li><code>setInterval(string, delay)</code></li>
+		<li><code>new Function(string)</code></li>
+	</ul>
+</article>
+
+<article>
+	<h3>Unsafe jQuery functions</h3>
+	<ul class="columns codez">
+		<li>$.after()</li>
+		<li>$.append()</li>
+		<li>$.appendTo()</li>
+		<li>$.before()</li>
+		<li>$.html()</li>
+		<li>$.insertAfter()</li>
+		<li>$.insertBefore()</li>
+		<li>$.prepend()</li>
+		<li>$.prependTo()</li>
+		<li>$.replaceAll()</li>
+		<li>$.replaceWith()</li>
+		<li>$.unwrap()</li>
+		<li>$.wrap()</li>
+		<li>$.wrapAll()</li>
+		<li>$.wrapInner()</li>
+		<li>$.prepend()</li>
+	</ul>
+	<cite class="urlize">http://twitpic.com/95n3ak</cite>
+</article>
+
+<article>
+	<h3>Safe jQuery functions</h3>
+	<ul class="build codez">
+		<li>$.text()</li>
+		<li>$.attr() - unless attr is JS event handler</li>
+	</ul>
+	<div class="build" style="margin-top: 1.5em;">
+		<div>
+		<cite class="urlize github">https://github.com/chrisisbeef/jquery-encoder</cite>
+		<h3>jQuery encoder</h3>
+		</div>
+	</div>
+	<ul class="build" style="margin-top: 1em">
+		<li>$.encoder.canonicalize()</li>
+		<li>$.encoder.encodeForCSS()</li>
+		<li>$.encoder.encodeForHTML()</li>
+		<li>$.encoder.encodeForHTMLAttribute()</li>
+		<li>$.encoder.encodeForJavaScript()</li>
+		<li>$.encoder.encodeForURL()</li>
+	</ul>
+</article>
+
+<article>
+	<h3>Templates?</h3>
+	<ul class="build">
+		<li>What kinds of coding/output-possibilites does it have?</li>
+		<li>Does it escape input?</li>
+		<li>What kinds of escaping?</li>
+		<li>Is the escaping <a href="https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet">context based</a>?</li>
+	</ul>
+</article>
+
+<article>
+	<h3>Templating example - Underscore.js</h3>
+	<ul class="build support">
+		<li>Tags:<ul class="noitem">
+			<li><code>&lt;%&nbsp;  %&gt;</code> - evaluate code</li>
+			<li><code>&lt;%= %&gt;</code> - output</li>
+			<li><code>&lt;%- %&gt;</code> - HTML-escaped output</li>
+		</ul></li>
+		<li>Escaping
+			<pre class="inbetween">_.escape = function(string) {
+  return (''+string).replace(/&amp;/g, '&amp;amp;').
+                     replace(/&lt;/g, '&amp;lt;').
+                     replace(/&gt;/g, '&amp;gt;').
+                     replace(/"/g, '&amp;quot;').
+                     replace(/'/g, '&amp;#x27;').
+                     replace(/\//g,'&amp;#x2F;');
+};</pre>
+		</li>
+	</ul>
+</article>
+
+<article>
+	<h3>This is all well and good as long as...</h3>
+	<ul class="build" style="margin-top: 1em">
+		<li>... you are not outputing inside javascript event handlers.</li>
+		<div>
+			<pre class="inbetween smaller lang-jst">&lt;button onclick="return confirm('Really delete &lt;%- model.title %&gt;')"&gt;Delete&lt;/button&gt;</pre>
+			<pre class="inbetween smaller">&lt;button onclick="return confirm('Really delete &amp;#x27;);alert(&amp;x27;XSS')"&gt;Delete&lt;/button&gt;</pre>
+		</div>
+		<li>... you are not using quote-less attributes:
+			<pre class="inbetween smaller lang-jst">&lt;img title=&lt;%- model.title %&gt;  ... &gt;</pre>
+			<pre class="inbetween smaller lang-html">&lt;img title=monkey onmouseover=alert(/XSS/.source) ... &gt;</pre>
+		</li>
+		<li>... you are not outputting data inside <code>style</code> attributes or tags</li>
+		<li>... you are not outputting data inside <code>script</code> tags</li>
+	</ul>
+	<div class="build" style="margin-top: 2em">
+		<p>For more info - see the <a href="https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet">OWASP XSS Prevention Cheat sheet</a></p>
+	</div>
+</article>
+
+<article>
+	<h3>Meanwhile - elsewhere in Norway</h3>
+
+	<pre>
+&lt;script language="JavaScript" type="text/javascript">
+  var qs = location.search.substring(1);
+  var nv = qs.split('&amp;');
+  var url = new Object();
+  for(i = 0; i &lt; nv.length; i++)
+  {
+    eq = nv[i].indexOf('=');
+    url[nv[i].substring(0,eq).toLowerCase()] 
+    	= unescape(nv[i].substring(eq + 1));
+  }
+&lt;/script>
+&lt;script LANGUAGE="JavaScript">
+	document.write('&lt;SCRIPT LANGUAGE="JavaScript" ' +
+	 'SRC="'+url['source']+'?"\>&lt;/SCRIPT\>');
+&lt;/script>
+	</pre>
+	<span class="warn">This is the entire HTML file...</span>
+</article>
+
+<article>
+	<h3>Content Security Policy</h3>
+	<ul class="build">
+		<li>Upcoming <a href="http://dvcs.w3.org/hg/content-security-policy/raw-file/tip/csp-specification.dev.html">standard</a></li>
+		<li>Fits well with single page web apps</li>
+		<li>Server instructs browser through header.
+		<pre class="inbetween lang-xml smaller">Content-Security-Policy: default-src 'self'; script-src 'self' *.googleapis.com</pre>
+		</li>
+		<li>By default disallows the unsafe versions of <code>eval/setTimeout/setInterval/new Function</code></li>
+		<li>By default disallows inline CSS and JavaScript</li>
+		<li>Allows developers to specify which domains scripts, images, videos etc. can be loaded from</li>
+		<li>Supported in Chrome and Firefox (rumored in IE10)</li>
+	</ul>
+</article>
+
+<article class="contrast">
+	<h3>A1 - Injection</h3>
+	<div style="text-align: center">
+		<img src="images/syringe.svg" style="background: #fff; height: 420px; width: 400px; padding-left: 60px; margin: 50px auto;"  />
+	</div>
+	<cite class="nosource">This is the <a href="http://www.fileformat.info/info/unicode/char/1f489/index.htm">Syringe unicode character - U+1F489</a></cite>
+</article>
+
+<article>
+	<h3>Client Side Injections</h3>
+	<ul class="build">
+		<li><strong>URL-injection</strong> - creating URLs in an unsafe way:</li>
+			<div><input type="text" value="frog/../../logout"><button>Search</button></div>
+			<code class="smaller">http://example.com/search/<span style="color: red">frog/../../logout</span></code>
+			<code class="smaller">http://example.com/?search=<span style="color: red">frog&amp;otherParam=123</span></code>
+		</li>
+		<li><strong>JSON-injection</strong> - creating JSON in an unsafe way:</li>
+		<code class="smaller">{"value1": "<span style="color: red">something","value2":"something evil</span>"}</code>		
+	</ul>
+</article>
+
+<article>
+	<h3>Server Side Injections</h3>
+	<ul class="build">
+		<li>SQL-injection can of course still be a problem on the server side</li>
+		<li>So can NoSQL-injection</li>
+	</ul>
+	<ul class="build">
+		<li>But what about JSON APIs and JS-based backends?</li>
+	</ul>
+</article>
+
+
+
+<article>
+	<h3>node.js</h3>
+	<div class="build">
+		<pre>var http = require('http');
+http.createServer(function (request, response) {
+  if (request.method === 'POST') {
+    var data = '';
+    request.addListener('data', function(chunk) { data += chunk; });
+    request.addListener('end', function() {
+      var stockQuery = eval("(" + data + ")");
+      var price = getStockPrice(stockQuery.symbol);
+      …
+});</pre>
+		<pre>while(1);</pre>
+	</div>
+	<cite class="nosource">
+		<div class="urlize">http://www.youtube.com/watch?v=3Vwr24MCCVg</div>
+		<div class="urlize">http://bishankochher.blogspot.com/2011/12/nodejs-security-good-bad-and-ugly.html</div>
+	</cite>
+	<aside>Demo</aside>
+</article>
+
+<article>
+	<h3>node.js server side eval</h3>
+	<ul class="build">
+		<li>DOS</li>
+		<li>Attack other servers</li>
+		<li>Read local files</li>
+		<li>Grab entire database (Hello SQL injection)</li>
+		<li>Upload arbitrary file and execute on server</li>
+	</ul>
+	<ul class="build">
+		<li><strong>This is NOT a node.js bug</strong> - it's unsafe use of javascript</li>
+	</ul>
+</article>
+
+<article>
+	<div class="build">
+		<h1>JSHint says "eval is evil"...</h1>
+		<h2>...I tend to agree...</h2>
+	</div>
+</article>
+
+<article>
+	<h3>Mass assignment / overposting</h3>
+	<div class="build">
+		<img src="images/egor.png" class="bottom-right" style="margin: 0px 10px 50px 0px"/>
+	</div>
+	<ul class="build">
+		<li>Are we still in control of our model?</li>
+	</ul>
+	<ul class="build">
+		<li>Altered timestamp for when an object was created</li>
+		<li>Added his own SSH key to the Rails project and made a commit to master</li>
+	</uL>
+	<cite class="urlize">http://chrisacky.posterous.com/github-you-have-let-us-all-down</cite>
+	<aside>Demo</aside>
+</article>
+
+
+
+<article>
+	<h3>And finally</h3>
+<($=[$=[]][(__=!$+$)[_=-~-~-~$]+({}+$)[_/_]+($$=($_=!''+$)[_/_]+$_[+$])])()[__[_/_]+__[_+~$]+$_[_]+$$](_/_)
+	<cite>Mario Heiderich - 106 bytes</h3>
+</article>
+
+<article>
+	<h1><code>alert(1)</code></h1>
+</article>
+
+<article style="background-image: url('images/mobile.png')" class="center-picture">
+
+</article>
+
+
+	  <article>
+		<h3>XEE - XML Entity Expansions</h3>
+		<pre style="font-size: 20px; line-height: 26px;">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;!DOCTYPE foo [ 
+	&lt;!ENTITY a "1234567890" &gt; 
+	&lt;!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;" &gt; 
+	&lt;!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;" &gt; 
+	&lt;!ENTITY d "&c;&c;&c;&c;&c;&c;&c;&c;" &gt; 
+	&lt;!ENTITY e "&d;&d;&d;&d;&d;&d;&d;&d;" &gt; 
+	&lt;!ENTITY f "&e;&e;&e;&e;&e;&e;&e;&e;" &gt; 
+	&lt;!ENTITY g "&f;&f;&f;&f;&f;&f;&f;&f;" &gt; 
+	&lt;!ENTITY h "&g;&g;&g;&g;&g;&g;&g;&g;" &gt; 
+	&lt;!ENTITY i "&h;&h;&h;&h;&h;&h;&h;&h;" &gt; 
+	&lt;!ENTITY j "&i;&i;&i;&i;&i;&i;&i;&i;" &gt; 
+	&lt;!ENTITY k "&j;&j;&j;&j;&j;&j;&j;&j;" &gt; 
+	&lt;!ENTITY l "&k;&k;&k;&k;&k;&k;&k;&k;" &gt; 
+	&lt;!ENTITY m "&l;&l;&l;&l;&l;&l;&l;&l;" &gt; 
+]&gt; 
+&lt;foo&gt;&m;&lt;/foo&gt;</pre>
+		<div class="build">
+			<span>Length: 687,194,767,360 bytes ~ 687 GB</span>
+		</div>
+	  </article>
+
+	  <article>
+		<h3>Memory exhaustion - a pile of foo</h3>
+		<pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;foo&gt;
+ &lt;foo&gt;
+  &lt;foo&gt;
+   &lt;foo&gt;
+    &lt;foo&gt;
+     &lt;foo&gt;
+      ...1 million foos later...
+       &lt;foo&gt;
+        Hola el mundo
+       &lt;/foo&gt;
+      ...there and back again...
+  &lt;/foo&gt;
+ &lt;/foo&gt;
+&lt;/foo&gt;
+
+		</pre>
+	  </article>
+
+	  <article>
+		<h3>XXE - XML eXternal Entity Attacks</h3>
+		<pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;!DOCTYPE foo [
+  &lt;!ELEMENT foo ANY&gt;
+  &lt;!ENTITY xxe SYSTEM "/etc/passwd"&gt;
+]&gt;
+&lt;foo&gt;&xxe;&lt;/foo&gt;</pre>
+	  </article>
+
+<article style="text-align: center" class="">
+	<img src="images/tangled-web.png" style="height: 100%;" />
+</article>
+
+<article>
+	<h3>Some final advice...</h3>
+	<ul class="build">
+		<li>Build <strong>robust JSON services</strong> with clearly defined transformations covered by automated tests</li>
+		<li>Remember the <strong>evil test cases</strong> - e.g. what should NOT be possible</li>
+		<li><strong>Seek frameworks with secure defaults</strong> - should default to HTML escaping etc.</li>
+		<li>As a developer, <strong>default to the secure functions</strong> - it's better to err on that side</li>
+		<li>You're testing your javascript, right? Why not also <strong>test your templates</strong>?</li>
+
+	</ul>
+</article>
+
+
+<article>
+	<h3>Remember...</h3>
+	<div class="build">
+		<div>
+			<q>A Lannister always pays his technical debts</q>
+			<p style="text-align: right">@johnkors</p>
+		</div>
+	</div>
+</article>
+
+<article style="position: relative" class="contrast">
+	<h3>Questions?</h3>
+		<ul>
+			Web/JS security people to follow on twitter:
+			<li><a href="http://twitter.com/0x6D6172696F">@0x6D6172696F</a></li>
+			<li><a href="http://twitter.com/johnwilander">@johnwilander</a></li>
+			<li><a href="http://twitter.com/wisecwisec">@wisecwisec</a></li>
+			<li><a href="http://twitter.com/garethheyes">@garethheyes</a></li>
+			<li><a href="http://twitter.com/kkotowicz">@kkotowicz</a></li>
+			<li><a href="http://twitter.com/homakov">@homakov</a></li>
+		</ul>
+
+
+	<ul style="position: absolute; bottom: 100px; right: 60px;">
+		<li>Erlend Oftedal - <a href="http://www.twitter.com/webtonull">@webtonull</a></li>
+		<li>erlend@oftedal.no</li>
+	</ul>
+</article>
+
+
+
+</section>  
+</body>
+</html>
+

@@ -1,0 +1,191 @@
+
+dt {
+	float: left;
+	width: 60px;
+	text-align: center;
+}
+dd:before {
+	content: "- ";
+}
+
+
+
+q.small {
+	font-size: 90%;
+}
+.bottom-left-picture {
+	background-repeat: no-repeat; background-position: left bottom;
+}
+.bottom-right-picture {
+	background-repeat: no-repeat; background-position: right bottom;		
+}
+.center-picture {
+	background-repeat: no-repeat; background-position: center center;		
+}
+.center-left-picture {
+	background-repeat: no-repeat; background-position: left center;		
+}
+.danger {
+	color: red;
+}
+.bottom-right {
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+}
+pre.inbetween  {
+	margin: 10px 0px 10px 0px;
+}
+article.contrast {
+	color: #B9B9B9 !important;
+	background-color: #1B1B1B  !important;  
+}
+article.contrast h1, article.contrast h2, article.contrast h3 {
+	color: #fff  !important;
+}
+ul ul:first-child {
+	margin-top: 10px;
+}
+a {
+	text-decoration: none;
+}
+ul.plus {
+	list-style-image: url('images/plus_16.png');
+}
+ul.plus li::before, ul.minus li::before, ul.important li::before {
+	content: '';
+}
+
+ul.minus {
+	list-style-image: url('images/minus_16.png');
+}
+ul.important {
+	list-style-image: url('images/important.gif');
+}
+ul.sub li::before {
+	content: '-';
+}
+
+
+.talkFrame {
+	margin: 0;
+	font-family: monospace;
+	font-size: 12pt;
+}
+.talkFrame.floating {
+	z-index: 20;
+	top: 120px;
+	position: absolute;
+}
+.talkFrame.right {
+	right: 60px;
+}
+.talkFrame.left {
+	left: 60px;
+}
+.talkFrame.floating .fakeFrame {
+	width: 350px;
+}
+.fakeFrame {
+	min-height: 200px;
+	border: 2px inset;
+	padding: 5px;
+	font-size: 12pt;
+}
+.source {
+	padding-right: 10px !important;
+}
+pre.lessFuzz {
+	font-size: 90%;
+	letter-spacing: 0;
+	line-height: 1.5em;
+	margin-top: 0;
+	margin-bottom: 0;
+	border: none;
+	box-shadow: none;
+	background: none;
+	padding: 0px;
+}
+.communication {
+	margin-top: 10px;
+	font-family: monospace;
+}
+.communication pre {
+	margin-top: 4px;
+}
+.communication .server {
+	text-align: right;
+}
+.communication .server pre {
+	text-align: left;
+}
+
+.headers code {
+	font-size: 70%;
+	color: #777;
+}
+.warn, .warn code {
+	color: #a00;
+}
+.graph, .graph td {
+	border: none;
+	font-size: 80%;
+	line-height:20px;
+}
+.graph td div{
+	float: left;
+	height: 20px;
+}
+.graph td img {
+	margin-top: -15px;
+}
+.green {
+	background: #1b1;
+}
+.red {
+	background: #b11;
+	margin-right: 5px;
+}
+
+pre.evil {
+	background: #FAA;
+}
+
+ul.noitem li:before{
+	content: "";
+}
+pre.smaller {
+	font-size: 58%;
+}
+
+
+.showinput {
+	border-top: 2px dashed #999; margin: 0px 304px 0px 110px; font-size: 60%; text-align: center; line-height: 20px; 
+}
+
+.source, cite {
+  position: absolute;
+  left: 60px;
+  top: 644px;
+  padding-right: 175px;
+  
+  font-size: 15px;
+  letter-spacing: 0;  
+  line-height: 18px;
+}
+.source:before, cite:before {
+  content: "Source: ";
+}
+cite.github:before {
+	content: "Github: ";
+}
+cite.nosource:before {
+	content: "";
+}
+
+.codez {
+	font-family: monospace;
+}
+code.smaller {
+	font-size: 80%;
+}
