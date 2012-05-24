@@ -1,6 +1,6 @@
 * **Presentation** is the slides
 * **nodeapp** is a small insecure node.js app
-* **railsapp** is a insecure single page webapp built with poorly written rails and backbone.js
+* **railsapp** is a insecure single page webapp built with poorly written rails and backbone.js code
 
 
 nodeapp and railsapp are two really **insecure** webapps. **Do NOT use the 
